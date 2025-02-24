@@ -112,8 +112,6 @@ class MainActivity : ComponentActivity() {
         // Enqueue the work request
         workManager.enqueue(request)
     }
-
-
 }
 
 
