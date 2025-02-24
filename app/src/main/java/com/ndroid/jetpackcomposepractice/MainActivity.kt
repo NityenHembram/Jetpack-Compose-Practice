@@ -86,24 +86,24 @@ class MainActivity : ComponentActivity() {
         // Extract the URI array from the intent
         Log.d("photocompress", "uriArray: hey")
         val uriArray = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableArrayExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getParcelableArrayExtra(Intent.EXTRA_STREAM)
+            intent.getParcelableExtra(Intent.EXTRA_STREAM)
         }
 
         // Check if the array is not empty and get the first URI
-        val uri = uriArray?.firstOrNull() as? Uri ?: return
+//        val uri = uriArray?.firstOrNull() as? Uri ?: return
         Log.d("photocompress", "uriArray: $uriArray")
-        Log.d("photocompress", "onNewIntent: $uri")
-
+        Log.d("photocompress", "onNewIntent: $uriArray")
+//
         // Update the ViewModel with the extracted URI
-        viewModel.updateUncompressedUri(uri)
+        viewModel.updateUncompressedUri(uriArray)
 
         // Create a work request for the PhotoCompressionWorker
         val request = OneTimeWorkRequestBuilder<PhotoCompressionWorker>().setInputData(
             workDataOf(
-                PhotoCompressionWorker.KEY_CONTENT_URI to uri.toString(),
+                PhotoCompressionWorker.KEY_CONTENT_URI to uriArray.toString(),
                 PhotoCompressionWorker.KEY_COMPRESSION_THRESHOLD to 1024 * 20L
             )
         ).build()
