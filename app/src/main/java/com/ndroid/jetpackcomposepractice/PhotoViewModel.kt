@@ -3,6 +3,7 @@ package com.ndroid.jetpackcomposepractice
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -24,6 +25,8 @@ class PhotoViewModel : ViewModel() {
 
     var workerId: UUID? by mutableStateOf(null)
         private set
+
+
 
     fun updateUncompressedUri(uri: Uri?) {
         uncompressUri = uri
