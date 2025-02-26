@@ -63,8 +63,7 @@ class PhotoCompressActivity : ComponentActivity() {
                 }
 
                 if (workResult?.outputData != null) {
-                    val filePath =
-                        workResult.outputData.getString(PhotoCompressionWorker.KEY_RESULT_PATH)
+                    val filePath = workResult.outputData.getString(PhotoCompressionWorker.KEY_RESULT_PATH)
                     filePath?.let {
                         val bitmap = BitmapFactory.decodeFile(it)
                         viewModel.updateCompressedBitmap(bitmap)
