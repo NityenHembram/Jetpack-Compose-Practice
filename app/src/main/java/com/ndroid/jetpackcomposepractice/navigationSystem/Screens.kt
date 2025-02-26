@@ -1,0 +1,16 @@
+package com.ndroid.jetpackcomposepractice.navigationSystem
+
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+sealed  class Screens(val route:String) {
+     @Serializable
+     data object HomeScreen:Screens(route = "Home_Screen")
+
+     @Serializable
+     data object DownloadManager:Screens(route = "Download_Manager")
+
+     @Serializable
+     data object New:Screens(route = "New")
+}

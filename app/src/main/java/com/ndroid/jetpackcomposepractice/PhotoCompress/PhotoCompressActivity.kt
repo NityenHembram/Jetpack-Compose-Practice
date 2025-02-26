@@ -1,4 +1,4 @@
-package com.ndroid.jetpackcomposepractice
+package com.ndroid.jetpackcomposepractice.PhotoCompress
 
 import android.content.Intent
 import android.graphics.BitmapFactory
