@@ -1,4 +1,4 @@
-package com.ndroid.jetpackcomposepractice
+package com.ndroid.jetpackcomposepractice.PhotoCompress
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -12,8 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
-import kotlin.math.log
-import kotlin.math.roundToInt
 
 
 /**

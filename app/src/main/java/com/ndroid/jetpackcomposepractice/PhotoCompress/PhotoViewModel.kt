@@ -1,9 +1,8 @@
-package com.ndroid.jetpackcomposepractice
+package com.ndroid.jetpackcomposepractice.PhotoCompress
 
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
