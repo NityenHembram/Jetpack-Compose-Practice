@@ -1,6 +1,9 @@
 package com.ndroid.jetpackcomposepractice.downloadManager
 
 import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,17 +21,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ndroid.jetpackcomposepractice.viewModelUtils.getViewModel
 import java.io.File
+import kotlin.contracts.contract
 
 
 @Composable
 fun DownloadManagerScreen() {
-    val viewModel: DownloadManagerViewModel = viewModel()
     val context = LocalContext.current
+    val viewModel = getViewModel{ DownloadManagerViewModel(context)}
+
 
     val progress by viewModel.progress.collectAsState()
     val status by viewModel.status.collectAsState()
+
+    val permissionManager =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+
+            })
 
 
 
@@ -50,12 +63,29 @@ fun DownloadManagerScreen() {
         Text("Progress: $progress%")
         Spacer(modifier = Modifier.height(10.dp))
 
+        val url = "https://testfile.org/1.3GBiconpng"
+        Button(modifier = Modifier.fillMaxWidth(), onClick = {
+            val file =
+                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "sample.mp4")
+            viewModel.downloadFile(
+                url,
+                file
+            )
+//            viewModel.downloadSomething(url)
+        }, enabled = progress == 0 || progress == 100) {
+            Text("Normal DownloadFile")
+        }
 
         Button(modifier = Modifier.fillMaxWidth(), onClick = {
-            val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"sample.mp4")
-            viewModel.downloadFile("https://www.sample-videos.com/video321/mp4/720/big_buck_bunny_720p_30mb.mp4",file)
+//            val file =
+//                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "sample.mp4")
+//            viewModel.downloadFile(
+//                url,
+//                file
+//            )
+            viewModel.downloadSomething(url)
         }, enabled = progress == 0 || progress == 100) {
-            Text("DownloadFile")
+            Text("Download Manager DownloadFile")
         }
 
     }

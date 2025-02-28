@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Jetpack compose practice"
 include(":app")
- 
+include(":Kotlin_Practice")
