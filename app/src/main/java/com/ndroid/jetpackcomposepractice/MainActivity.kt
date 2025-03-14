@@ -46,6 +46,7 @@ import coil3.compose.AsyncImage
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoCompressActivity
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoCompressionWorker
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoViewModel
+import com.ndroid.jetpackcomposepractice.loginScreen.LoginScreen
 import com.ndroid.jetpackcomposepractice.navigationSystem.Screens
 import com.ndroid.jetpackcomposepractice.navigationSystem.SetupNavHost
 import com.ndroid.jetpackcomposepractice.ui.theme.JetpackComposePracticeTheme
@@ -62,9 +63,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             navHostController = rememberNavController()
             JetpackComposePracticeTheme {
-                Scaffold(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { innerpadding ->
-                    SetupNavHost(this,navHostController = navHostController)
-                }
+//                Scaffold(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { innerpadding ->
+//                    SetupNavHost(this,navHostController = navHostController)
+//                }
+                LoginScreen()
             }
         }
     }

@@ -9,8 +9,8 @@ sealed  class Screens(val route:String) {
      data object HomeScreen:Screens(route = "Home_Screen")
 
      @Serializable
-     data object DownloadManager:Screens(route = "Download_Manager")
+     data object DownloadManager:Screens(route = "Download Manager")
 
      @Serializable
-     data object New:Screens(route = "New")
+     data object LoginScreen:Screens(route = "Login Screen")
 }
