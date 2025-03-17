@@ -77,9 +77,5 @@ dependencies {
 
 
     implementation(libs.okhttp)
-
-
-
-
-
+    implementation(project(":opencv"))
 }

@@ -1,11 +1,14 @@
 package com.ndroid.jetpackcomposepractice
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,8 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.work.OneTimeWorkRequestBuilder
@@ -49,7 +55,9 @@ import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoViewModel
 import com.ndroid.jetpackcomposepractice.loginScreen.LoginScreen
 import com.ndroid.jetpackcomposepractice.navigationSystem.Screens
 import com.ndroid.jetpackcomposepractice.navigationSystem.SetupNavHost
+import com.ndroid.jetpackcomposepractice.openScanner.OpenScanner
 import com.ndroid.jetpackcomposepractice.ui.theme.JetpackComposePracticeTheme
+import org.opencv.android.OpenCVLoader
 
 class MainActivity : ComponentActivity() {
 
@@ -60,17 +68,38 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val TAG = "OPENSCANNER"
+        if(OpenCVLoader.initLocal()){
+            Log.d(TAG, "OpenScanner: OpenCv Loaded Successfully")
+        }else{
+            Toast.makeText(this, "OpenCv Initialazation failed", Toast.LENGTH_LONG).show()
+            Log.d(TAG, "OpenScanner: OpenCv Loaded failed")
+        }
+
+        askCameraPermission()
+
         setContent {
             navHostController = rememberNavController()
             JetpackComposePracticeTheme {
 //                Scaffold(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { innerpadding ->
 //                    SetupNavHost(this,navHostController = navHostController)
 //                }
-                LoginScreen()
+//                LoginScreen()
+                OpenScanner()
             }
         }
     }
+
+    fun askCameraPermission(){
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),0)
+        }
+    }
 }
+
+
+
 
 
 
