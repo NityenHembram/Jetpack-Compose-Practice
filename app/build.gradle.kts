@@ -77,5 +77,7 @@ dependencies {
 
 
     implementation(libs.okhttp)
-    implementation(project(":opencv"))
+    implementation(libs.opencv)
+
+    implementation (libs.play.services.mlkit.document.scanner)
 }

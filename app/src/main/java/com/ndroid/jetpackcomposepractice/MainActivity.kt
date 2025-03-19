@@ -13,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,7 @@ import coil3.compose.AsyncImage
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoCompressActivity
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoCompressionWorker
 import com.ndroid.jetpackcomposepractice.PhotoCompress.PhotoViewModel
+import com.ndroid.jetpackcomposepractice.googleMlScanner.GoogleMlScanner
 import com.ndroid.jetpackcomposepractice.loginScreen.LoginScreen
 import com.ndroid.jetpackcomposepractice.navigationSystem.Screens
 import com.ndroid.jetpackcomposepractice.navigationSystem.SetupNavHost
@@ -86,15 +88,19 @@ class MainActivity : ComponentActivity() {
 //                    SetupNavHost(this,navHostController = navHostController)
 //                }
 //                LoginScreen()
-                OpenScanner()
+//                OpenScanner()
+                GoogleMlScanner()
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun askCameraPermission(){
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ){
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),0)
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this,Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA,Manifest.permission.READ_MEDIA_IMAGES),0)
         }
+
     }
 }
 

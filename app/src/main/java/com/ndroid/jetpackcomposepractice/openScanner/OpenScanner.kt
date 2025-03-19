@@ -1,50 +1,53 @@
 package com.ndroid.jetpackcomposepractice.openScanner
 
+import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import org.opencv.android.OpenCVLoader
+import coil3.compose.AsyncImage
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_PDF
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import org.opencv.android.Utils
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Size
-import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
 
 
@@ -114,15 +117,76 @@ fun  OpenScanner (){
 //       }
 //    }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Button(onClick = { imagePicker.launch("image/*") }) {
+
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val options = GmsDocumentScannerOptions.Builder()
+        .setGalleryImportAllowed(false)
+        .setPageLimit(2)
+        .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
+        .setScannerMode(SCANNER_MODE_FULL)
+        .build()
+
+
+    val scanner = GmsDocumentScanning.getClient(options)
+    val scannerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        result ->
+        Log.d("resultScanner", "OpenScanner: ${result.data?.extras}")
+
+
+        if (result.resultCode == RESULT_OK) {
+            val result =
+                GmsDocumentScanningResult.fromActivityResultIntent(result.data)
+            if (result != null) {
+                result.pages?.let { pages ->
+                    for (page in pages) {
+                         imageUri = pages[0].imageUri
+                    }
+                }
+
+                result.pdf?.let { pdf ->
+                    val pdfUri = pdf.uri
+                    val pageCount = pdf.pageCount
+                }
+            }
+
+        }
+    }
+
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 39.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(onClick = {
+//            imagePicker.launch("image/*")
+        scanner.getStartScanIntent(context as Activity).addOnSuccessListener { intentSender ->
+            scannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+        }.addOnFailureListener{
+
+
+        }
+
+
+        }) {
             Text("Pick an Image")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+        imageUri?.let {
+            uri ->
+            AsyncImage(
+                model = uri,
+                contentDescription = "cropped image",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         capturedBitmap?.let { bitmap ->
-            Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)) {
                 Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Captured Image", modifier = Modifier.fillMaxSize())
 
                 // Draw draggable points
@@ -141,16 +205,18 @@ fun  OpenScanner (){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            croppedBitmap = capturedBitmap?.let { cropDocument(it, cornerPoints) }
-        }) {
-            Text("Crop Document")
-        }
+//        Button(onClick = {
+//            croppedBitmap = capturedBitmap?.let { cropDocument(it, cornerPoints) }
+//        }) {
+//            Text("Crop Document")
+//        }
 
         croppedBitmap?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text("Cropped Document:")
-            Image(bitmap = it.asImageBitmap(), contentDescription = "Cropped Image", modifier = Modifier.fillMaxWidth().height(300.dp))
+            Image(bitmap = it.asImageBitmap(), contentDescription = "Cropped Image", modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp))
         }
     }
 }
@@ -242,6 +308,9 @@ fun cropDocument(inputBitmap: Bitmap, points: List<Point>): Bitmap {
 
     return outputBitmap
 }
+
+
+
 
 fun detectEdges(inputBitmap:Bitmap) : Bitmap{
 //    Convert Bitmap to OpenCv mat
