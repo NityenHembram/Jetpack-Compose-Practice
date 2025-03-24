@@ -3,10 +3,18 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-}
+    id("kotlin-parcelize")}
 
 android {
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file(rootProject.extra["myValue"] as String)
+            storePassword = "123456"
+            keyAlias = "compose"
+            keyPassword = "123456"
+        }
+    }
     namespace = "com.ndroid.jetpackcomposepractice"
     compileSdk = 35
 
@@ -80,4 +88,6 @@ dependencies {
     implementation(libs.opencv)
 
     implementation (libs.play.services.mlkit.document.scanner)
+
+
 }

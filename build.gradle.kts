@@ -6,3 +6,4 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
 
 }
+val myValue by extra("C:\\Users\\nityen.h\\Downloads\\newkey\\practicekey.jks")

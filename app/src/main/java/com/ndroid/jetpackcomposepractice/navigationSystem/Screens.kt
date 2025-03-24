@@ -13,4 +13,10 @@ sealed  class Screens(val route:String) {
 
      @Serializable
      data object LoginScreen:Screens(route = "Login Screen")
+
+     @Serializable
+     data object OpenImageScreen:Screens(route = "OpenImage Screen")
+
+     @Serializable
+     data object GoogleMlScanner:Screens(route = "googleMlScanner Screen")
 }

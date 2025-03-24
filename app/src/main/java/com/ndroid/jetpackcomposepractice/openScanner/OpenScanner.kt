@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,13 +26,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -42,6 +46,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
+import com.ndroid.jetpackcomposepractice.googleMlScanner.ImageDetails
 import org.opencv.android.Utils
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -49,6 +54,9 @@ import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 /**
@@ -57,7 +65,8 @@ import org.opencv.imgproc.Imgproc
 
 
 @Composable
-fun  OpenScanner (){
+fun  OpenScanner (imageDetails: ImageDetails?){
+    Log.d("clicked", "OpenScanner: $imageDetails")
 
     val context = LocalContext.current
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -66,6 +75,11 @@ fun  OpenScanner (){
     var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var croppedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var cornerPoints by remember { mutableStateOf(listOf<Point>()) }
+
+
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
 
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         uri ->
@@ -119,97 +133,97 @@ fun  OpenScanner (){
 
 
 
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+//    var imageDetails by remember { mutableStateOf<ImageDetails?>(imageDetails) }
+//
+//    val options = GmsDocumentScannerOptions.Builder()
+//        .setGalleryImportAllowed(false)
+//        .setPageLimit(2)
+//        .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
+//        .setScannerMode(SCANNER_MODE_FULL)
+//        .build()
+//
+//
+//    val scanner = GmsDocumentScanning.getClient(options)
+//    val scannerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+//        result ->
+//        Log.d("resultScanner", "OpenScanner: ${result.data?.extras}")
+//
+//
+//        if (result.resultCode == RESULT_OK) {
+//            val result =
+//                GmsDocumentScanningResult.fromActivityResultIntent(result.data)
+//            if (result != null) {
+//                result.pages?.let { pages ->
+//                    for (page in pages) {
+//                         imageUri = pages[0].imageUri
+//                    }
+//                }
+//
+//                result.pdf?.let { pdf ->
+//                    val pdfUri = pdf.uri
+//                    val pageCount = pdf.pageCount
+//                }
+//            }
+//
+//        }
+//    }
 
-    val options = GmsDocumentScannerOptions.Builder()
-        .setGalleryImportAllowed(false)
-        .setPageLimit(2)
-        .setResultFormats(RESULT_FORMAT_JPEG, RESULT_FORMAT_PDF)
-        .setScannerMode(SCANNER_MODE_FULL)
-        .build()
-
-
-    val scanner = GmsDocumentScanning.getClient(options)
-    val scannerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-        result ->
-        Log.d("resultScanner", "OpenScanner: ${result.data?.extras}")
-
-
-        if (result.resultCode == RESULT_OK) {
-            val result =
-                GmsDocumentScanningResult.fromActivityResultIntent(result.data)
-            if (result != null) {
-                result.pages?.let { pages ->
-                    for (page in pages) {
-                         imageUri = pages[0].imageUri
-                    }
-                }
-
-                result.pdf?.let { pdf ->
-                    val pdfUri = pdf.uri
-                    val pageCount = pdf.pageCount
-                }
-            }
-
-        }
+    fun Offset.rotateBy(angle: Float): Offset {
+        val angleInRadians = angle * (PI / 180)
+        val cos = cos(angleInRadians)
+        val sin = sin(angleInRadians)
+        return Offset((x * cos - y * sin).toFloat(), (x * sin + y * cos).toFloat())
     }
+
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var zoom by remember { mutableFloatStateOf(1f) }
+    var angle by remember { mutableFloatStateOf(0f) }
 
 
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(top = 39.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(onClick = {
-//            imagePicker.launch("image/*")
-        scanner.getStartScanIntent(context as Activity).addOnSuccessListener { intentSender ->
-            scannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
-        }.addOnFailureListener{
 
 
-        }
 
-
-        }) {
-            Text("Pick an Image")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        imageUri?.let {
-            uri ->
+        imageDetails?.let {
+            data ->
             AsyncImage(
-                model = uri,
+                model = data.uri,
                 contentDescription = "cropped image",
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+                modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                    detectTransformGestures(
+                        onGesture = { centroid, pan, gestureZoom, gestureRotate ->
+                            val oldScale = zoom
+                            val newScale = zoom * gestureZoom
 
-        capturedBitmap?.let { bitmap ->
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)) {
-                Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Captured Image", modifier = Modifier.fillMaxSize())
-
-                // Draw draggable points
-                cornerPoints.forEachIndexed { index, point ->
-                    DraggablePoint(
-                        initialOffset = Offset(point.x.toFloat(), point.y.toFloat()),
-                        onPositionChange = { newOffset ->
-                            cornerPoints = cornerPoints.toMutableList().apply {
-                                set(index, Point(newOffset.x.toDouble(), newOffset.y.toDouble()))
-                            }
+                            // For natural zooming and rotating, the centroid of the gesture should
+                            // be the fixed point where zooming and rotating occurs.
+                            // We compute where the centroid was (in the pre-transformed coordinate
+                            // space), and then compute where it will be after this delta.
+                            // We then compute what the new offset should be to keep the centroid
+                            // visually stationary for rotating and zooming, and also apply the pan.
+                            offset =
+                                (offset + centroid / oldScale).rotateBy(gestureRotate) -
+                                        (centroid / newScale + pan / oldScale)
+                            zoom = newScale
+                            angle += gestureRotate
                         }
                     )
                 }
-            }
+                    .graphicsLayer {
+                        translationX = -offset.x * zoom
+                        translationY = -offset.y * zoom
+                        scaleX = zoom
+                        scaleY = zoom
+                        rotationZ = angle
+                        transformOrigin = TransformOrigin(0f, 0f)
+                    }
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-//        Button(onClick = {
-//            croppedBitmap = capturedBitmap?.let { cropDocument(it, cornerPoints) }
-//        }) {
-//            Text("Crop Document")
-//        }
 
         croppedBitmap?.let {
             Spacer(modifier = Modifier.height(16.dp))

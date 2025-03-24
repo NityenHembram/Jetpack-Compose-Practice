@@ -85,11 +85,11 @@ class MainActivity : ComponentActivity() {
             navHostController = rememberNavController()
             JetpackComposePracticeTheme {
 //                Scaffold(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { innerpadding ->
-//                    SetupNavHost(this,navHostController = navHostController)
+                    SetupNavHost(this,navHostController = navHostController)
 //                }
 //                LoginScreen()
 //                OpenScanner()
-                GoogleMlScanner()
+//                GoogleMlScanner()
             }
         }
     }
